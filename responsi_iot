@@ -1,0 +1,74 @@
+
+#include "DHT.h"
+
+// Konfigurasi DHT22
+#define DHTPIN 4
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
+
+// Konfigurasi HC-SR04
+#define TRIG_PIN 5
+#define ECHO_PIN 18
+
+void setup() {
+  Serial.begin(115200);
+
+  // Memulai sensor DHT22
+  dht.begin();
+
+  // Mengatur pin HC-SR04
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+
+  Serial.println("==============================");
+  Serial.println("MONITORING DHT22 & HC-SR04");
+  Serial.println("==============================");
+
+  delay(2000);
+}
+
+void loop() {
+
+  // Membaca suhu dan kelembapan
+  float suhu = dht.readTemperature();
+  float kelembapan = dht.readHumidity();
+
+  // Membaca jarak HC-SR04
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  long durasi = pulseIn(ECHO_PIN, HIGH, 30000);
+  float jarak = durasi * 0.0343 / 2;
+
+  // Menampilkan hasil sensor
+  Serial.println();
+  Serial.println("===== HASIL PEMBACAAN SENSOR =====");
+
+  if (isnan(suhu) || isnan(kelembapan)) {
+    Serial.println("Gagal membaca DHT22!");
+  } else {
+    Serial.print("Suhu       : ");
+    Serial.print(suhu);
+    Serial.println(" °C");
+
+    Serial.print("Kelembapan : ");
+    Serial.print(kelembapan);
+    Serial.println(" %");
+  }
+
+  if (durasi == 0) {
+    Serial.println("Jarak      : Tidak terdeteksi");
+  } else {
+    Serial.print("Jarak      : ");
+    Serial.print(jarak);
+    Serial.println(" cm");
+  }
+
+  Serial.println("==================================");
+
+  delay(2000);
+}
